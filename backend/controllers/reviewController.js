@@ -3,7 +3,6 @@ import Product from '../models/Product.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Controller POST: Add a rating and feedback comment
-// REPLACE your current addReview function with this logic:
 export const addReview = async (req, res) => {
   const { rating, comment, name } = req.body;
   const targetId = req.params.id;
@@ -39,7 +38,7 @@ export const addReview = async (req, res) => {
 // Controller GET: Fetch all reviews for a specific product
 export const getProductReviews = async (req, res) => {
   try {
-    const reviews = await Review.find({ product: req.params.id }).sort({ createdAt: -1 });
+    const reviews = await Review.find({ productID: req.params.id }).sort({ createdAt: -1 });
     res.json(reviews);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -49,7 +48,7 @@ export const getProductReviews = async (req, res) => {
 // Controller GET: Compile review strings and ping Gemini-2.5-Flash for an automated analysis synthesis
 export const getAiSummary = async (req, res) => {
   try {
-    const reviews = await Review.find({ product: req.params.id });
+    const reviews = await Review.find({ productID: req.params.id });
     
     if (reviews.length === 0) {
       return res.json({ summary: "No consumer evaluation metrics exist yet to process analytical AI evaluation passes." });
