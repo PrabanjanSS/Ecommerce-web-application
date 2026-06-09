@@ -4,7 +4,7 @@ export default function Orders({ user }) {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5001/api/orders/myorders', {
+    fetch('import.meta.env.VITE_API_URL/api/orders/myorders', {
       headers: { 'Authorization': `Bearer ${user.token}` }
     })
       .then(res => res.json())

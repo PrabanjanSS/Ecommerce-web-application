@@ -21,13 +21,13 @@ export default function AdminDashboard({ user }) {
   const fetchDashboardData = async () => {
     const headers = { 'Authorization': `Bearer ${user.token}`, 'Content-Type': 'application/json' };
     
-    const statsRes = await fetch('http://localhost:5001/api/orders/admin/stats', { headers });
+    const statsRes = await fetch('import.meta.env.VITE_API_URL/api/orders/admin/stats', { headers });
     setStats(await statsRes.json());
 
-    const prodRes = await fetch('http://localhost:5001/api/products');
+    const prodRes = await fetch('import.meta.env.VITE_API_URL/api/products');
     setProducts(await prodRes.json());
 
-    const ordRes = await fetch('http://localhost:5001/api/orders/admin/all', { headers });
+    const ordRes = await fetch('import.meta.env.VITE_API_URL/api/orders/admin/all', { headers });
     setOrders(await ordRes.json());
   };
 
@@ -38,7 +38,7 @@ export default function AdminDashboard({ user }) {
     // Fixed: Transmitting category and a random realistic baseline star rating to the database
     const randomRating = Math.floor(Math.random() * 2) + 4; // Generates a realistic 4 or 5 star rating
 
-    await fetch('http://localhost:5001/api/products', {
+    await fetch('import.meta.env.VITE_API_URL/api/products', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${user.token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
@@ -60,7 +60,7 @@ export default function AdminDashboard({ user }) {
     if (!amount || amount <= 0) return;
     const computedNewStock = product.stock + Number(amount);
     
-    await fetch(`http://localhost:5001/api/products/${product._id}`, {
+    await fetch(`import.meta.env.VITE_API_URL/api/products/${product._id}`, {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${user.token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ stock: computedNewStock })
@@ -71,7 +71,7 @@ export default function AdminDashboard({ user }) {
   };
 
   const handleDeleteProduct = async (id) => {
-    await fetch(`http://localhost:5001/api/products/${id}`, {
+    await fetch(`import.meta.env.VITE_API_URL/api/products/${id}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${user.token}` }
     });
@@ -79,7 +79,7 @@ export default function AdminDashboard({ user }) {
   };
 
   const handleUpdateStatus = async (orderId, newStatus) => {
-    await fetch(`http://localhost:5001/api/orders/admin/status/${orderId}`, {
+    await fetch(`import.meta.env.VITE_API_URL/api/orders/admin/status/${orderId}`, {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${user.token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus })

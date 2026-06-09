@@ -32,7 +32,7 @@ export default function Home({ cart, setCart, user }) {
   }, [selectedProduct]);
 
   const fetchProductsDataset = () => {
-    let url = `http://localhost:5001/api/products?search=${search}&category=${selectedCategory}&sort=${sortOption}`;
+    let url = `import.meta.env.VITE_API_URL/api/products?search=${search}&category=${selectedCategory}&sort=${sortOption}`;
     fetch(url)
       .then(res => res.json())
       .then(data => setProducts(data))
@@ -57,7 +57,7 @@ export default function Home({ cart, setCart, user }) {
     setLoadingAi(true);
 
     try {
-      const resReviews = await fetch(`http://localhost:5001/api/products/${product._id}/reviews`);
+      const resReviews = await fetch(`import.meta.env.VITE_API_URL/api/products/${product._id}/reviews`);
       if (resReviews.ok) {
         const dataReviews = await resReviews.json();
         setReviews(dataReviews);
@@ -65,7 +65,7 @@ export default function Home({ cart, setCart, user }) {
     } catch (e) { console.error(e); }
 
     try {
-      const resAi = await fetch(`http://localhost:5001/api/products/${product._id}/ai-summary`);
+      const resAi = await fetch(`import.meta.env.VITE_API_URL/api/products/${product._id}/ai-summary`);
       if (resAi.ok) {
         const dataAi = await resAi.json();
         setAiSummary(dataAi.summary);
@@ -94,7 +94,7 @@ export default function Home({ cart, setCart, user }) {
         headersConfig['Authorization'] = `Bearer ${user.token}`;
       }
 
-      const response = await fetch(`http://localhost:5001/api/products/${selectedProduct._id}/reviews`, {
+      const response = await fetch(`import.meta.env.VITE_API_URL/api/products/${selectedProduct._id}/reviews`, {
         method: 'POST',
         headers: headersConfig,
         body: JSON.stringify({ 
@@ -110,7 +110,7 @@ export default function Home({ cart, setCart, user }) {
         setReviewError('');
         
         // Instant isolated review data array synchronization refresh
-        const resReviews = await fetch(`http://localhost:5001/api/products/${selectedProduct._id}/reviews`);
+        const resReviews = await fetch(`import.meta.env.VITE_API_URL/api/products/${selectedProduct._id}/reviews`);
         if (resReviews.ok) {
           const updatedReviews = await resReviews.json();
           setReviews(updatedReviews);
