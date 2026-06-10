@@ -17,7 +17,7 @@ export default function Home({ cart, setCart, user }) {
   const [reviewerName, setReviewerName] = useState(''); 
   const [reviewError, setReviewError] = useState('');
 
-  const categories = ['All', 'Computing', 'Mobile', 'Audio', 'Wearables', 'Accessories'];
+  const categories = ['AllAll', 'Computing', 'Mobile', 'Audio', 'Wearables', 'Accessories'];
 
   // LOCK BACKGROUND SCROLL WHEN MODAL IS ACTIVE
   useEffect(() => {
