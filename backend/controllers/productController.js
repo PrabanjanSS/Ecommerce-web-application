@@ -138,13 +138,19 @@ export const getProductReviews = async (req, res) => {
 };
 
 // 7. Live Internet Web Research with Resilient Error Fallback Mechanisms
+// 7. Live Internet Web Research with Resilient Error Fallback Mechanisms
 export const getAiSummary = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
+    if (!product) {
+      if (res) return res.status(404).json({ message: "Product not found" });
+      return "Product not found";
+    }
 
     if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ summary: "System Error: Backend GEMINI_API_KEY is missing from environment profiles." });
+      const errorMsg = "System Error: Backend GEMINI_API_KEY is missing from environment profiles.";
+      if (res) return res.status(500).json({ summary: errorMsg });
+      return errorMsg;
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -160,6 +166,7 @@ export const getAiSummary = async (req, res) => {
     let responseText = "";
 
     try {
+      // Primary Attempt: Grounded Search
       const result = await model.generateContent({
         contents: [{ role: 'user', parts: [{ text: internetResearchPrompt }] }],
         tools: [{ googleSearchRetrieval: { dynamicRetrievalConfig: { mode: "MODE_DYNAMIC", dynamicThreshold: 0.3 } } }]
@@ -167,18 +174,34 @@ export const getAiSummary = async (req, res) => {
       responseText = result.response.text();
     } catch (searchError) {
       console.warn("⚠️ Gemini Grounded Search tool unavailable. Executing native fallback generation pass...");
+      
       try {
+        // Secondary Fallback: Native LLM Generation
         const fallbackPrompt = `Provide a comprehensive expert overview, key technical specifications, typical real-world advantages, limitations, and general market consensus for the following hardware asset based on your comprehensive knowledge base: "${product.name}". Format cleanly using bullet points and prominent bold headers.`;
         const fallbackResult = await model.generateContent(fallbackPrompt);
         responseText = fallbackResult.response.text();
       } catch (fallbackError) {
-        throw new Error(`Both Search-grounded generation and core native AI pipelines failed: ${fallbackError.message}`);
+        // Tertiary Fallback: Check if it's an API quota limit block
+        if (fallbackError.message?.includes("429") || fallbackError.message?.includes("quota")) {
+          responseText = "### AI Summary Temporarily Unavailable\nOur automated product analysis module is currently resting due to daily API rate limits. Please check back later!";
+        } else {
+          throw new Error(`Both Search-grounded generation and core native AI pipelines failed: ${fallbackError.message}`);
+        }
       }
     }
 
-    res.json({ summary: responseText });
+    if (res) {
+      return res.json({ summary: responseText });
+    }
+    return responseText;
+
   } catch (error) {
-    console.error("❌ Critical Final Failure in getAiSummary pipeline:", error);
-    res.status(500).json({ message: `Internal Assistant Error: Core AI synthesis pipelines are offline.` });
+    console.error("❌ Critical Final Failure in getAiSummary pipeline:", error.message);
+    
+    const fallbackFailureString = "Internal Assistant Error: Core AI synthesis pipelines are offline.";
+    if (res) {
+      return res.status(500).json({ message: fallbackFailureString });
+    }
+    return fallbackFailureString;
   }
 };
